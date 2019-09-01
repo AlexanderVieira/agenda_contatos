@@ -4,47 +4,47 @@ import android.app.Activity
 import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_resultado.*
-
-private const val FILE_NAME = "backup.txt"
-private const val DELITER = "#"
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 
 class ResultadoActivity : AppCompatActivity() {
+
+    var myContacts = mutableListOf<Pessoa>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_resultado)
 
-        var myContacts = load(FILE_NAME)
-        val contatoAdapter = ArrayAdapter<Pessoa>(this, android.R.layout.simple_list_item_1, myContacts)
-        lst_contatos.adapter = contatoAdapter
-        Toast.makeText(this,"Lista carregada com sucesso!", Toast.LENGTH_LONG).show()
-    }
+        var dataBaseRef = FirebaseDatabase.getInstance().getReference()
+        var contatoRef = dataBaseRef.child("usuarios")
+        contatoRef.addValueEventListener(object : ValueEventListener {
 
-    fun load(file: String): List<Pessoa>{
-        val myContatos = mutableListOf<Pessoa>()
-        openFileInput(FILE_NAME).use {fis->
-            fis.bufferedReader().use {reader->
-                val lines  = reader.readLines()
-                var index = 0
-                while (index < lines.size){
-                    if (lines[index++] == DELITER){
-                        val nome = lines[index++]
-                        val telefone = lines[index++]
-                        val email = lines[index++]
-                        val cidade = lines[index++]
-                        myContatos.add(Pessoa(nome, telefone, email, cidade))
-                    } else {
-                        Toast.makeText(this,"Erro Aplicativo!", Toast.LENGTH_LONG).show()
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                /*val value = dataSnapshot.getValue().toString()
+                Log.i("FIREBASE", "Value is: " + value!!)*/
+                myContacts.clear()
+                for (dados in dataSnapshot.children){
+                    var contato = dados.getValue(Pessoa::class.java)
+                    contato?.let {
+                        myContacts.add(it)
                     }
                 }
             }
-        }
-        return  myContatos
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.w("FIREBASE", "Failed to read value.", error.toException())
+            }
+        })
+        val contatoAdapter = ArrayAdapter<Pessoa>(this, android.R.layout.simple_list_item_1, myContacts)
+        lst_contatos.adapter = contatoAdapter
+        contatoAdapter.notifyDataSetChanged()
+        Toast.makeText(this,"Lista carregada com sucesso!", Toast.LENGTH_LONG).show()
     }
-
-
 }

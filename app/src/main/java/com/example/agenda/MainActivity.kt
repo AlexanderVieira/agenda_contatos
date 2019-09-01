@@ -1,7 +1,6 @@
 package com.example.agenda
 
 import android.Manifest
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -9,20 +8,21 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.database.FirebaseDatabase
 import kotlinx.android.synthetic.main.activity_main.*
 
-
-private const val FILE_NAME = "backup.txt"
-private const val DELITER = "#"
 private const val WRITE_REQUEST_CODE = 1
 
 class MainActivity : AppCompatActivity() {
 
     lateinit var nome: String
+    lateinit var senha: String
     lateinit var telefone: String
+    lateinit var celular: String
     lateinit var email: String
+    lateinit var cpf: String
     lateinit var cidade: String
-
+    //private lateinit var database: FirebaseDatabase
     private var contatos: MutableList<Pessoa> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,62 +57,45 @@ class MainActivity : AppCompatActivity() {
 
     fun saveForm() {
         nome = edtxt_nome.text.toString()
+        senha = edtxt_senha.text.toString()
         telefone = edtxt_telefone.text.toString()
+        celular = edtxt_celular.text.toString()
         email = edtxt_email.text.toString()
+        cpf = edtxt_cpf.text.toString()
         cidade = edtxt_cidade.text.toString()
 
-        if (nome.isNullOrEmpty() && telefone.isNullOrEmpty() && email.isNullOrEmpty() && cidade.isNullOrEmpty()){
+        if (nome.isNullOrEmpty() && senha.isNullOrEmpty()
+            && telefone.isNullOrEmpty() && celular.isNullOrEmpty()
+            && email.isNullOrEmpty() && cpf.isNullOrEmpty() && cidade.isNullOrEmpty()){
             Toast.makeText(this,"Preencha os campos obrigatórios!", Toast.LENGTH_LONG).show()
         }
         else if (nome.isNullOrEmpty()){
             Toast.makeText(this,"Nome é obrigatório!", Toast.LENGTH_LONG).show()
         }
-        else if (telefone.isNullOrEmpty()){
-            Toast.makeText(this,"Telefone é obrigatório!", Toast.LENGTH_LONG).show()
+        else if (senha.isNullOrEmpty()){
+            Toast.makeText(this,"Senha é obrigatório!", Toast.LENGTH_LONG).show()
+        }
+        else if (email.isNullOrEmpty()){
+            Toast.makeText(this,"E-mail é obrigatório!", Toast.LENGTH_LONG).show()
         }
         else{
-            contatos = load(FILE_NAME)
-            var myContato = Pessoa(nome, telefone, email, cidade)
-            var newContatos = contatos.plus(myContato)
-
-            openFileOutput(FILE_NAME, Context.MODE_PRIVATE).use { fos->
-                fos?.bufferedWriter().use { writer ->
-                    newContatos.forEach { contato ->
-                        writer?.appendln("#\n$contato")
-                    }
-                }
-            }
+            //contatos = load(FILE_NAME)
+            var myContato = Pessoa(nome, senha, telefone, celular, email, cpf, cidade)
+            var dataBaseRef = FirebaseDatabase.getInstance().getReference()
+            var contatoRef = dataBaseRef.child("usuarios")
+            contatoRef.child("002").setValue(myContato)
             clear()
             Toast.makeText(this,"Contato salvo com sucesso!", Toast.LENGTH_LONG).show()
         }
     }
 
-    fun load(file: String): MutableList<Pessoa>{
-            val myContatos = mutableListOf<Pessoa>()
-            openFileInput(FILE_NAME).use {fis->
-                fis.bufferedReader().use {reader->
-                    val lines  = reader.readLines()
-                    var index = 0
-                    while (index < lines.size){
-                        if (lines[index++] == DELITER){
-                            val nome = lines[index++]
-                            val telefone = lines[index++]
-                            val email = lines[index++]
-                            val cidade = lines[index++]
-                            myContatos.add(Pessoa(nome, telefone, email, cidade))
-                        } else {
-                            Toast.makeText(this,"Erro Aplicativo!", Toast.LENGTH_LONG).show()
-                        }
-                    }
-                }
-            }
-            return  myContatos
-    }
-
     fun clear(){
             nome = edtxt_nome.setText("").toString()
+            senha = edtxt_senha.setText("").toString()
             telefone = edtxt_telefone.setText("").toString()
+            celular = edtxt_celular.setText("").toString()
             email = edtxt_email.setText("").toString()
+            cpf = edtxt_cpf.setText("").toString()
             cidade = edtxt_cidade.setText("").toString()
     }
 
