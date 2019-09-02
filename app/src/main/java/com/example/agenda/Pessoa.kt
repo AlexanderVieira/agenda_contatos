@@ -8,6 +8,8 @@ class Pessoa (val nome: String,
               val cpf: String,
               val cidade: String){
 
+    constructor(): this("", "", "", "", "", "", "")
+
     override fun toString(): String {
         return "$nome\n$senha\n$telefone\n$celular\n$email\n$cpf\n$cidade"
     }
