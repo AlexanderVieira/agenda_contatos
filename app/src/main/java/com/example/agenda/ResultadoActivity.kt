@@ -1,20 +1,18 @@
 package com.example.agenda
 
-import android.app.Activity
-import android.content.Context
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Toast
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.activity_resultado.*
-import com.google.firebase.database.DatabaseError
+import androidx.appcompat.app.AppCompatActivity
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdView
 import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import android.text.method.TextKeyListener.clear
-
+import kotlinx.android.synthetic.main.activity_resultado.*
 
 
 class ResultadoActivity : AppCompatActivity() {
@@ -26,8 +24,13 @@ class ResultadoActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_resultado)
 
+        val mAdView = findViewById<View>(R.id.adView) as AdView
+        val adRequest = AdRequest.Builder().build()
+        mAdView.loadAd(adRequest)
+
         var dataBaseRef = FirebaseDatabase.getInstance().getReference()
         var contatoRef = dataBaseRef.child("usuarios")
+
         contatoRef.addValueEventListener(object : ValueEventListener {
 
             override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -39,24 +42,10 @@ class ResultadoActivity : AppCompatActivity() {
                     var contato = contatoSnapshot.getValue(Pessoa::class.java)
                     myContacts.add(contato.toString())
                 }
-
-                /*val snapshotIterator = dataSnapshot.children
-                val iterator = snapshotIterator.iterator()
-
-                myContacts.clear()
-
-                while (iterator.hasNext()) {
-                    val next = iterator.next() as DataSnapshot
-
-                    val match = next.getValue(Pessoa::class.java)
-                    val key = next.key
-                    //listKey.add(key!!)
-                    myContacts.add(match.toString())
-                }*/
             }
 
             override fun onCancelled(error: DatabaseError) {
-                Log.w("FIREBASE", "Failed to read value.", error.toException())
+                Log.i("FIREBASE", "Failed to read value.", error.toException())
             }
         })
 

@@ -41,18 +41,23 @@
                 <com.google.android.material.textfield.TextInputEditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:id="@+id/edtxt_nome" android:hint="Nome" android:textSize="14sp"/>
+                        android:id="@+id/edtxt_nome"
+                        android:inputType="text"
+                        android:hint="Nome"
+                        android:digits="abcdefghijklmnopqrstuvxwyzABCDEFGHIJKLMNOPQRSTUVXWYZ' '"
+                        android:textSize="14sp"/>
             </com.google.android.material.textfield.TextInputLayout>
             <EditText
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textPassword"
                     android:ems="10"
                     android:id="@+id/edtxt_senha"
+                    android:inputType="textPassword"
+                    android:hint="Senha"
                     app:layout_constraintTop_toBottomOf="@+id/textInputLayout" android:layout_marginEnd="8dp"
                     app:layout_constraintEnd_toEndOf="parent" android:layout_marginRight="8dp"
                     android:layout_marginStart="8dp" app:layout_constraintStart_toStartOf="parent"
-                    android:layout_marginLeft="8dp" android:hint="Senha"
+                    android:layout_marginLeft="8dp"
                     app:layout_constraintBottom_toTopOf="@+id/textInputLayout3" android:textSize="14sp"/>
             <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
@@ -66,7 +71,10 @@
                 <com.google.android.material.textfield.TextInputEditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:id="@+id/edtxt_email" android:hint="E-mail" android:textSize="14sp"/>
+                        android:id="@+id/edtxt_confirmaSenha"
+                        android:hint="ConfirmaSenha"
+                        android:inputType="textPassword"
+                        android:textSize="14sp"/>
             </com.google.android.material.textfield.TextInputLayout>
             <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
@@ -80,7 +88,10 @@
                 <com.google.android.material.textfield.TextInputEditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:id="@+id/edtxt_telefone" android:hint="Telefone" android:textSize="14sp"/>
+                        android:id="@+id/edtxt_email"
+                        android:inputType="textEmailAddress"
+                        android:hint="E-mail"
+                        android:textSize="14sp"/>
             </com.google.android.material.textfield.TextInputLayout>
             <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
@@ -94,7 +105,8 @@
                 <com.google.android.material.textfield.TextInputEditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:id="@+id/edtxt_celular" android:hint="Celular" android:textSize="14sp"/>
+                        android:id="@+id/edtxt_celular" android:hint="Celular"
+                        android:textSize="14sp"/>
             </com.google.android.material.textfield.TextInputLayout>
             <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
