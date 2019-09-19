@@ -5,11 +5,16 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.google.android.gms.ads.AdListener
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.InterstitialAd
+import com.google.android.gms.ads.MobileAds
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.android.synthetic.main.activity_main.*
@@ -18,6 +23,8 @@ import kotlinx.android.synthetic.main.activity_main.view.*
 private const val FILE_NAME = "backup.txt"
 private const val DELITER = "#"
 private const val WRITE_REQUEST_CODE = 1
+const val AD_UNIT_ID = "ca-app-pub-3940256099942544/1033173712"
+const val AD_APP_UNIT_ID = "ca-app-pub-6747684087188676~8801996200"
 
 class MainActivity : AppCompatActivity() {
 
@@ -28,15 +35,24 @@ class MainActivity : AppCompatActivity() {
     lateinit var email: String
     lateinit var cpf: String
     lateinit var cidade: String
-    //private lateinit var database: FirebaseDatabase
+    private lateinit var mInterstitialAd: InterstitialAd
     private var contatos: MutableList<Pessoa> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        edtxt_cpf.addTextChangedListener(Mascara.mask("###.###.###-##", edtxt_cpf))
+        MobileAds.initialize(this, AD_APP_UNIT_ID)
+        mInterstitialAd = InterstitialAd(this)
+        mInterstitialAd.adUnitId = AD_UNIT_ID
+        /**/mInterstitialAd.loadAd(AdRequest.Builder().build())
+        mInterstitialAd.adListener = object : AdListener() {
+            override fun onAdClosed() {
+                mInterstitialAd.loadAd(AdRequest.Builder().build())
+            }
+        }
 
+        edtxt_cpf.addTextChangedListener(Mascara.mask("###.###.###-##", edtxt_cpf))
         setListeners()
     }
 
@@ -51,14 +67,18 @@ class MainActivity : AppCompatActivity() {
                 saveForm(view)
             }
 
-            /*ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_CONTACTS,
-                Manifest.permission.READ_CONTACTS), WRITE_REQUEST_CODE)
-            saveForm()*/
         }
         btn_limpar.setOnClickListener {
             clear()
         }
         btn_visualizar.setOnClickListener {
+
+            if (mInterstitialAd.isLoaded) {
+                mInterstitialAd.show()
+            } else {
+                Log.i("TAG", "The interstitial wasn't loaded yet.")
+            }
+
             val resultIntent = Intent(this@MainActivity, ResultadoActivity::class.java)
             startActivity(resultIntent)
         }
@@ -198,18 +218,5 @@ class MainActivity : AppCompatActivity() {
                 }.show()
         }
     }
-
-    /*override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
-        if (requestCode == WRITE_REQUEST_CODE){
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED){
-                Toast.makeText(this, "Permissão concedida.", Toast.LENGTH_LONG).show()
-            }
-            else{
-                Snackbar.make(cl_root_main_activity, "Permissão negada.", Snackbar.LENGTH_LONG ).show()
-            }
-        }
-    }*/
 
 }
