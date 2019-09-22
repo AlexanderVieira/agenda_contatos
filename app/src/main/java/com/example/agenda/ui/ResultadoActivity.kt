@@ -1,4 +1,4 @@
-package com.example.agenda
+package com.example.agenda.ui
 
 import android.os.Bundle
 import android.util.Log
@@ -6,6 +6,8 @@ import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.agenda.R
+import com.example.agenda.model.Pessoa
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdView
 import com.google.firebase.database.DataSnapshot
@@ -24,14 +26,14 @@ class ResultadoActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_resultado)
 
-        val mAdView = findViewById<View>(R.id.adView) as AdView
+        val mAdView = findViewById<View>(R.id.adView_tarefas) as AdView
         val adRequest = AdRequest.Builder().build()
         mAdView.loadAd(adRequest)
 
         var dataBaseRef = FirebaseDatabase.getInstance().getReference()
         var contatoRef = dataBaseRef.child("usuarios")
 
-        contatoRef.addValueEventListener(object : ValueEventListener {
+        val contatoListener = object : ValueEventListener {
 
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 var value = dataSnapshot.getValue().toString()
@@ -47,10 +49,11 @@ class ResultadoActivity : AppCompatActivity() {
             override fun onCancelled(error: DatabaseError) {
                 Log.i("FIREBASE", "Failed to read value.", error.toException())
             }
-        })
+        }
+        contatoRef.addValueEventListener(contatoListener)
 
         val contatoAdapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, myContacts)
-        lst_contatos.adapter = contatoAdapter
+        lst_tarefas.adapter = contatoAdapter
         contatoAdapter.notifyDataSetChanged()
 
         Toast.makeText(this,"Lista carregada com sucesso!", Toast.LENGTH_LONG).show()

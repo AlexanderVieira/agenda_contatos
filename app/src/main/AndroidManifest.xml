@@ -16,14 +16,18 @@
         <meta-data
                 android:name="com.google.android.gms.ads.APPLICATION_ID"
                 android:value="ca-app-pub-6747684087188676~8801996200"/>
-        <activity android:name=".ResultadoActivity">
+        <activity android:name=".ui.ResultadoActivity">
         </activity>
-        <activity android:name=".MainActivity">
+        <activity android:name=".ui.TarefasActivity">
+        </activity>
+        <activity android:name=".ui.LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+        </activity>
+        <activity android:name=".ui.MainActivity">
         </activity>
     </application>
 

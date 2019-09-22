@@ -1,4 +1,4 @@
-package com.example.agenda
+package com.example.agenda.ui
 
 import android.Manifest
 import android.content.Context
@@ -11,18 +11,27 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.example.agenda.R
+import com.example.agenda.model.Pessoa
+import com.example.agenda.util.CPFUtil
+import com.example.agenda.util.Mascara
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.InterstitialAd
 import com.google.android.gms.ads.MobileAds
 import com.google.android.material.snackbar.Snackbar
-import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.database.*
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_main.view.*
 
 private const val FILE_NAME = "backup.txt"
 private const val DELITER = "#"
 private const val WRITE_REQUEST_CODE = 1
+const val TAG_MAIN: String = "MainActivity"
+const val EXTRA_EMAIL_USUARIO = "emailUsuario"
+const val EXTRA_CAMPO_EMAIL = "campoEmail"
 const val AD_UNIT_ID = "ca-app-pub-3940256099942544/1033173712"
 const val AD_APP_UNIT_ID = "ca-app-pub-6747684087188676~8801996200"
 
@@ -35,12 +44,20 @@ class MainActivity : AppCompatActivity() {
     lateinit var email: String
     lateinit var cpf: String
     lateinit var cidade: String
-    private lateinit var mInterstitialAd: InterstitialAd
+    lateinit var mInterstitialAd: InterstitialAd
+    lateinit var mAuth: FirebaseAuth
+    lateinit var dataBaseRef: DatabaseReference
+    lateinit var contatoRef: DatabaseReference
+    lateinit var contato: Pessoa
     private var contatos: MutableList<Pessoa> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        mAuth = FirebaseAuth.getInstance()
+        dataBaseRef = FirebaseDatabase.getInstance().getReference()
+        contatoRef = dataBaseRef.child("usuarios")
 
         MobileAds.initialize(this, AD_APP_UNIT_ID)
         mInterstitialAd = InterstitialAd(this)
@@ -54,6 +71,12 @@ class MainActivity : AppCompatActivity() {
 
         edtxt_cpf.addTextChangedListener(Mascara.mask("###.###.###-##", edtxt_cpf))
         setListeners()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        var currentUser = mAuth.currentUser
+        updateUI(currentUser)
     }
 
     fun setListeners(){
@@ -76,7 +99,7 @@ class MainActivity : AppCompatActivity() {
             if (mInterstitialAd.isLoaded) {
                 mInterstitialAd.show()
             } else {
-                Log.i("TAG", "The interstitial wasn't loaded yet.")
+                Log.i(TAG_MAIN, "The interstitial wasn't loaded yet.")
             }
 
             val resultIntent = Intent(this@MainActivity, ResultadoActivity::class.java)
@@ -121,33 +144,64 @@ class MainActivity : AppCompatActivity() {
         }
         else if (!isEmailValid(email)) {
             //Toast.makeText(this, "Email inválido!", Toast.LENGTH_LONG).show();
-            showSnackFeedback("Email Inválido1", false, view.btn_salvar)
+            showSnackFeedback("Email Inválido!", false, view.btn_salvar)
         }
         else if (CPFUtil.myValidateCPF(cpf)){
 
-            // Salva no firebase Database RealTime
-            var myContato = Pessoa(nome, senha, confirmaSenha, celular, email, cpf, cidade)
-            var dataBaseRef = FirebaseDatabase.getInstance().getReference()
-            var contatoRef = dataBaseRef.child("usuarios")
-            contatoRef.child("005").setValue(myContato)
+            mAuth.createUserWithEmailAndPassword(email, senha)
+                .addOnCompleteListener(this) { task ->
+                    if (task.isSuccessful) {
+                        // Sign in success, update UI with the signed-in user's information
+                        Log.i(TAG_MAIN, "createUserWithEmail:success")
+                        val user = mAuth.currentUser
+                        updateUI(user)
 
-            if(contatos.size > 0 || contatos != null){
-                // Carrega o arquivo txt
-                contatos = load(FILE_NAME)
-            }
+                        if (user != null){
+                            Log.i(TAG_MAIN, user.email.toString())
+                            //Log.i(TAG_MAIN, user.displayName.toString())
+                            Log.i(TAG_MAIN, user.uid)
+                            //var myContato = Usuario(user.uid, nome,"alex.silva", user.email.toString(), senha, confirmaSenha)
+                        }
 
-            var newContatos = contatos.plus(myContato)
-            openFileOutput(FILE_NAME, Context.MODE_PRIVATE).use { fos->
-                fos?.bufferedWriter().use { writer ->
-                    newContatos.forEach { contato ->
-                        writer?.appendln("#\n$contato")
+                    } else {
+                        // If sign in fails, display a message to the user.
+                        Log.i(TAG_MAIN, "createUserWithEmail:failure", task.exception)
+                        Toast.makeText(baseContext, "Authentication failed.",
+                            Toast.LENGTH_SHORT).show()
+                        updateUI(null)
+                    }
+                    // ...
+                }
+
+            contato = Pessoa(nome, senha, confirmaSenha, celular, email, cpf, cidade)
+
+            val user = mAuth.currentUser
+            if (user != null){
+                contatoRef.child(user.uid).setValue(contato)
+
+                if(contatos.size > 0 || contatos != null){
+                    // Carrega o arquivo txt
+                    contatos = load(FILE_NAME)
+                }
+
+                var newContatos = contatos.plus(contato)
+                openFileOutput(FILE_NAME, Context.MODE_PRIVATE).use { fos->
+                    fos?.bufferedWriter().use { writer ->
+                        newContatos.forEach { contato ->
+                            writer?.appendln("#\n$contato")
+                        }
                     }
                 }
+
+                var resultIntentLogin = Intent(this@MainActivity, LoginActivity::class.java )
+                resultIntentLogin.putExtra(EXTRA_EMAIL_USUARIO,  contato.email)
+                startActivity(resultIntentLogin)
+
+                clear()
+                showSnackFeedback("CPF válido", true, view.btn_salvar)
+                Toast.makeText(this,"Contato salvo com sucesso!", Toast.LENGTH_LONG).show()
             }
 
-            clear()
-            showSnackFeedback("CPF válido", true, view.btn_salvar)
-            Toast.makeText(this,"Contato salvo com sucesso!", Toast.LENGTH_LONG).show()
         }
         else {
             showSnackFeedback("CPF Inválido", false, view)
@@ -166,7 +220,7 @@ class MainActivity : AppCompatActivity() {
 
     fun load(file: String): MutableList<Pessoa>{
         val myContatos = mutableListOf<Pessoa>()
-        openFileInput(FILE_NAME).use {fis->
+        openFileInput(FILE_NAME).use { fis->
             fis.bufferedReader().use {reader->
                 val lines  = reader.readLines()
                 var index = 0
@@ -179,7 +233,17 @@ class MainActivity : AppCompatActivity() {
                         val email = lines[index++]
                         val cpf = lines[index++]
                         val cidade = lines[index++]
-                        myContatos.add(Pessoa(nome, senha, confirmaSenha, celular, email, cpf, cidade))
+                        myContatos.add(
+                            Pessoa(
+                                nome,
+                                senha,
+                                confirmaSenha,
+                                celular,
+                                email,
+                                cpf,
+                                cidade
+                            )
+                        )
                     } else {
                         Toast.makeText(this,"Erro Aplicativo!", Toast.LENGTH_LONG).show()
                     }
@@ -217,6 +281,24 @@ class MainActivity : AppCompatActivity() {
                     )
                 }.show()
         }
+    }
+
+    private fun updateUI(currentUser: FirebaseUser?) {
+        if (currentUser != null){
+            showSnackbar(btn_salvar, "Olá " + currentUser.email!!)
+        }
+        else{
+            showSnackbar(btn_salvar, "Olá, cadastre-se ou insira suas credenciais.")
+        }
+    }
+
+    private fun showSnackbar(view: View, msg: String) {
+        Snackbar.make( view, msg, Snackbar.LENGTH_LONG)
+            .setAction("Action", null).show()
+    }
+
+    private fun showToast(context: Context, msg:String){
+        Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
     }
 
 }

@@ -1,4 +1,4 @@
-package com.example.agenda
+package com.example.agenda.util
 
 import android.text.Editable
 import android.text.TextWatcher
