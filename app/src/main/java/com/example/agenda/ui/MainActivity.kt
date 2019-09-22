@@ -46,6 +46,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var cidade: String
     lateinit var mInterstitialAd: InterstitialAd
     lateinit var mAuth: FirebaseAuth
+    lateinit var user: FirebaseUser
     lateinit var dataBaseRef: DatabaseReference
     lateinit var contatoRef: DatabaseReference
     lateinit var contato: Pessoa
@@ -62,7 +63,7 @@ class MainActivity : AppCompatActivity() {
         MobileAds.initialize(this, AD_APP_UNIT_ID)
         mInterstitialAd = InterstitialAd(this)
         mInterstitialAd.adUnitId = AD_UNIT_ID
-        /**/mInterstitialAd.loadAd(AdRequest.Builder().build())
+        mInterstitialAd.loadAd(AdRequest.Builder().build())
         mInterstitialAd.adListener = object : AdListener() {
             override fun onAdClosed() {
                 mInterstitialAd.loadAd(AdRequest.Builder().build())
@@ -73,11 +74,11 @@ class MainActivity : AppCompatActivity() {
         setListeners()
     }
 
-    override fun onStart() {
+    /*override fun onStart() {
         super.onStart()
         var currentUser = mAuth.currentUser
         updateUI(currentUser)
-    }
+    }*/
 
     fun setListeners(){
         btn_salvar.setOnClickListener {view ->
@@ -94,7 +95,7 @@ class MainActivity : AppCompatActivity() {
         btn_limpar.setOnClickListener {
             clear()
         }
-        btn_visualizar.setOnClickListener {
+        btn_cancelar.setOnClickListener {
 
             if (mInterstitialAd.isLoaded) {
                 mInterstitialAd.show()
@@ -102,7 +103,7 @@ class MainActivity : AppCompatActivity() {
                 Log.i(TAG_MAIN, "The interstitial wasn't loaded yet.")
             }
 
-            val resultIntent = Intent(this@MainActivity, ResultadoActivity::class.java)
+            val resultIntent = Intent(this@MainActivity, LoginActivity::class.java)
             startActivity(resultIntent)
         }
     }
@@ -153,21 +154,14 @@ class MainActivity : AppCompatActivity() {
                     if (task.isSuccessful) {
                         // Sign in success, update UI with the signed-in user's information
                         Log.i(TAG_MAIN, "createUserWithEmail:success")
-                        val user = mAuth.currentUser
+                        user = mAuth.currentUser!!
                         updateUI(user)
-
-                        if (user != null){
-                            Log.i(TAG_MAIN, user.email.toString())
-                            //Log.i(TAG_MAIN, user.displayName.toString())
-                            Log.i(TAG_MAIN, user.uid)
-                            //var myContato = Usuario(user.uid, nome,"alex.silva", user.email.toString(), senha, confirmaSenha)
-                        }
 
                     } else {
                         // If sign in fails, display a message to the user.
                         Log.i(TAG_MAIN, "createUserWithEmail:failure", task.exception)
-                        Toast.makeText(baseContext, "Authentication failed.",
-                            Toast.LENGTH_SHORT).show()
+                        /*Toast.makeText(baseContext, "Authentication failed.",
+                            Toast.LENGTH_SHORT).show()*/
                         updateUI(null)
                     }
                     // ...
@@ -175,7 +169,7 @@ class MainActivity : AppCompatActivity() {
 
             contato = Pessoa(nome, senha, confirmaSenha, celular, email, cpf, cidade)
 
-            val user = mAuth.currentUser
+            user = mAuth.currentUser!!
             if (user != null){
                 contatoRef.child(user.uid).setValue(contato)
 
@@ -193,13 +187,13 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
 
-                var resultIntentLogin = Intent(this@MainActivity, LoginActivity::class.java )
+                /*var resultIntentLogin = Intent(this@MainActivity, LoginActivity::class.java )
                 resultIntentLogin.putExtra(EXTRA_EMAIL_USUARIO,  contato.email)
-                startActivity(resultIntentLogin)
+                startActivity(resultIntentLogin)*/
 
-                clear()
-                showSnackFeedback("CPF válido", true, view.btn_salvar)
-                Toast.makeText(this,"Contato salvo com sucesso!", Toast.LENGTH_LONG).show()
+                //clear()
+                //showSnackFeedback("CPF válido", true, view.btn_salvar)
+                //Toast.makeText(this,"Contato salvo com sucesso!", Toast.LENGTH_LONG).show()
             }
 
         }
@@ -271,8 +265,8 @@ class MainActivity : AppCompatActivity() {
 
     fun requestContactsPermission(){
         if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_CONTACTS)){
-            //Toast.makeText(this,"...", Toast.LENGTH_LONG).show()
-            Snackbar.make(cl_root_main_activity, "Permitir ao Agenda acesso aos contatos.", Snackbar.LENGTH_INDEFINITE)
+
+            Snackbar.make(cl_root_main_activity, "Permitir ao Aplicativo Agenda acesso aos contatos.", Snackbar.LENGTH_INDEFINITE)
                 .setAction("OK") {
                     ActivityCompat.requestPermissions(
                         this@MainActivity,
@@ -284,8 +278,22 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateUI(currentUser: FirebaseUser?) {
+
         if (currentUser != null){
+            clear()
             showSnackbar(btn_salvar, "Olá " + currentUser.email!!)
+            showSnackFeedback("CPF válido", true, btn_salvar)
+            var resultIntentLogin = Intent(this@MainActivity, LoginActivity::class.java )
+            resultIntentLogin.putExtra(EXTRA_EMAIL_USUARIO,  contato.email)
+            startActivity(resultIntentLogin)
+            finish()
+
+            if (mInterstitialAd.isLoaded) {
+                mInterstitialAd.show()
+            } else {
+                Log.i(TAG_MAIN, "The interstitial wasn't loaded yet.")
+            }
+
         }
         else{
             showSnackbar(btn_salvar, "Olá, cadastre-se ou insira suas credenciais.")

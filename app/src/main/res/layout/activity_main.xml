@@ -144,8 +144,9 @@
                     android:layout_marginLeft="8dp" android:layout_marginStart="8dp"
                     app:layout_constraintEnd_toStartOf="@+id/btn_limpar" android:layout_marginEnd="8dp"
                     android:layout_marginRight="8dp"
-                    app:layout_constraintBottom_toTopOf="@+id/btn_visualizar"
-                    app:layout_constraintTop_toBottomOf="@+id/textInputLayout7"/>
+                    app:layout_constraintBottom_toTopOf="@+id/btn_cancelar"
+                    app:layout_constraintTop_toBottomOf="@+id/textInputLayout7"
+                    android:background="@color/colorPrimary" android:layout_marginTop="8dp"/>
             <Button
                     android:text="Limpar"
                     android:layout_width="wrap_content"
@@ -153,18 +154,21 @@
                     android:id="@+id/btn_limpar" app:layout_constraintEnd_toEndOf="parent"
                     android:layout_marginEnd="8dp" android:layout_marginRight="8dp"
                     app:layout_constraintStart_toEndOf="@+id/btn_salvar"
-                    app:layout_constraintBottom_toTopOf="@+id/btn_visualizar"
-                    app:layout_constraintTop_toBottomOf="@+id/textInputLayout7"/>
+                    app:layout_constraintBottom_toTopOf="@+id/btn_cancelar"
+                    app:layout_constraintTop_toBottomOf="@+id/textInputLayout7"
+                    android:background="@color/com_facebook_button_login_silver_background_color_pressed"
+                    android:layout_marginBottom="8dp" android:layout_marginTop="8dp"/>
             <Button
-                    android:text="Visualizar"
+                    android:text="Cancelar"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/btn_visualizar" app:layout_constraintEnd_toEndOf="parent"
+                    android:id="@+id/btn_cancelar" app:layout_constraintEnd_toEndOf="parent"
                     android:layout_marginEnd="8dp" android:layout_marginRight="8dp"
                     app:layout_constraintStart_toStartOf="parent" android:layout_marginLeft="8dp"
                     android:layout_marginStart="8dp"
                     app:layout_constraintTop_toBottomOf="@+id/btn_salvar"
-                    app:layout_constraintBottom_toBottomOf="parent"/>
+                    app:layout_constraintBottom_toBottomOf="parent" android:background="@color/colorAccent"
+                    android:layout_marginTop="8dp"/>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -44,15 +44,22 @@ dependencies {
     implementation 'com.firebaseui:firebase-ui-database:5.1.0'
 
     // FirebaseUI for Firebase Auth
-    implementation 'com.firebaseui:firebase-ui-auth:5.1.0'
+    //implementation 'com.firebaseui:firebase-ui-auth:5.1.0'
+    //implementation 'com.google.firebase:firebase-auth:16.0.5'
+    implementation 'com.google.firebase:firebase-auth:18.1.0'
 
     // NOTA: Dependência para Material Design
     implementation 'com.google.android.material:material:1.0.0'
+
+    // Dependência para o autenticação com o facebook
+    implementation 'com.facebook.android:facebook-android-sdk:[4,5)'
 
     implementation 'com.squareup.retrofit2:retrofit:2.6.1'
     implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:3.8.0'
     implementation 'org.apache.commons:commons-lang3:3.6'
+
+    implementation 'com.github.douglasjunior:android-simple-tooltip:0.2.2'
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'

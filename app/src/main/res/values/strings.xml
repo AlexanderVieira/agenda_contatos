@@ -2,4 +2,6 @@
     <string name="app_name">Agenda</string>
     <string name="banner">BANNER</string>
     <string name="adview_uid">ca-app-pub-3940256099942544/6300978111</string>
+    <string name="facebook_app_id">730627337349859</string>
+    <string name="fb_login_protocol_scheme">fb730627337349859</string>
 </resources>
